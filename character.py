@@ -66,6 +66,7 @@ def fetch(name: str = typer.Option(None, "--name", "-n"),
           status: str = typer.Option(None, "--status", "-s"),
           id: int = typer.Option(None, "--id", "-i"),
           location: str = typer.Option(None, "--id", "-l"),
+          episode: str = typer.Option(None, "--episode", "-e"),
           type: str = typer.Option(None, "--type", "-t"),
           species: str = typer.Option(None, "--species", "-sp"),
           gender: str = typer.Option(None, "--gender", "-g")):

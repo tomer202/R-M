@@ -2,7 +2,7 @@ from datetime import datetime
 import pandas as pd
 import ram_requests
 import requests
-from texttable import Texttable
+from PIL import Image
 
 COMMANDS = ["ls", "filter", "get"]
 
@@ -137,6 +137,12 @@ def ls_analyzer(rules, type, length):
     print_table(table, rules)
 
 
+def get_image(json_results):
+    url_str = json_results[0]["image"]
+    img = Image.open(requests.get(url_str, stream=True).raw)
+    img.show()
+
+
 def fetch_analyzer(args, type, rules):
     """
     the fetch_analyzer will get arguments, type, and rules and will fetch all the the matching objects.
@@ -154,4 +160,8 @@ def fetch_analyzer(args, type, rules):
     table = []
     for item in filtered_list:
         table.append(format_json_item(item, rules))
+
+    if len(filtered_list) == 1 and type == "characters":
+        get_image(filtered_list)
+
     print_table(table=table, rules=rules)
