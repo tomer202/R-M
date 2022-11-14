@@ -5,8 +5,8 @@ app = typer.Typer()
 
 TYPE = "episodes"
 
-
 RULES = ["episode", "id", "name", "air_date"]
+
 
 @app.command()
 def ls(episode: bool = typer.Option(True, "--episode", "-e"),
@@ -62,6 +62,7 @@ def code(episode: int = typer.Option(True, "--episode", "-e"),
     the_code = "S" + "{:02d}".format(season) + "E" + "{:02d}".format(episode)
     fetch(episode=the_code, id=None, name=None)
 
+
 def break_the_rules_fetch(flags):
     """
     this function check if rules are broken, if SEGNIFICATE_FLAGS_FETCH and more flags are inputed then rulse are broken....
@@ -75,6 +76,7 @@ def break_the_rules_fetch(flags):
             broke = True
             break
     return broke
+
 
 @app.command()
 def fetch(episode: str = typer.Option(None, "--episode", "-e"),
@@ -95,6 +97,7 @@ def fetch(episode: str = typer.Option(None, "--episode", "-e"),
         args_keys = list(filter(lambda rule: vars_dict[rule], vars_dict.keys()))
         args = {key: vars_dict[key] for key in args_keys}
         ram_analyzer.fetch_analyzer(args, TYPE, rules)
+
 
 @app.command()
 def date(befor: bool = typer.Option(False, "--befor", "-b"),
