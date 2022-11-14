@@ -3,6 +3,7 @@ import pandas as pd
 import ram_requests
 import requests
 from PIL import Image
+from typing import List
 
 COMMANDS = ["ls", "filter", "get"]
 
@@ -15,8 +16,6 @@ PROPERTY_TO_COUNT = {"characters": "episode", "locations": "residents", "episode
 
 MONTH_DICT = {"January": "01", "February": "02", "March": "03", "April": "04", "May": "05", "June": "06", "July": "07",
               "August": "08", "September": "09", "October": "10", "November": "11", "December": "12"}
-FORMAT_INT = {"1": "01", "2": "02", "3": "03", "4": "04", "5": "05", "6": "06", "7": "07", "8": "08", "9": "09",
-              "10": "10", "11": "11", "12": "12"}
 
 
 def format_date(date):
@@ -26,7 +25,7 @@ def format_date(date):
     :return: formated date (12/12/2012)
     """
     str_date = date.split()
-    return FORMAT_INT[str_date[1][0]] + "/" + MONTH_DICT[str_date[0]] + "/" + str_date[2]
+    return "{:02d}".format(str_date[1][0]) + "/" + MONTH_DICT[str_date[0]] + "/" + str_date[2]
 
 
 def filter_date(json_list, date, befor):
@@ -58,15 +57,15 @@ def analyze_date(befor, type, date, rules):
     :param rules: the columns specified
     :return: prints a table
     """
-    ls_list = ram_requests.ls(type, -1)
+    listed_jsons = ram_requests.ls(type, -1)
     table = []
-    filter_ls = filter_date(ls_list, date, befor)
+    filter_ls = filter_date(listed_jsons, date, befor)
     for item in filter_ls:
         table.append(format_json_item(item, rules))
     print_table(table, rules)
 
 
-def count_item_properties(json_list, type):
+def count_item_properties(json_list: list, type) -> List[int]:
     """
     this function gets a type and counts their property per item
     :param json_list: the list
@@ -88,11 +87,11 @@ def ls_with_count_property_analyzer(rules, type, top):
     :return: print table
     """
     table = []
-    ls_list = ram_requests.ls(type, -1)
-    count_list = count_item_properties(ls_list, type)
-    for offset in range(len(ls_list)):
-        ls_list[offset]["count"] = count_list[offset]
-        row = format_json_item(ls_list[offset], rules)
+    listed_json = ram_requests.ls(type, -1)
+    count_list = count_item_properties(listed_json, type)
+    for count_item, json_item in zip(count_list, listed_json):
+        json_item["count"] = count_item
+        row = format_json_item(json_item, rules)
         table.append(row)
 
     final_table = table[:top][:]
@@ -131,8 +130,8 @@ def ls_analyzer(rules, type, length):
     :return:
     """
     table = []
-    ls_list = ram_requests.ls(type, length)
-    for item in ls_list:
+    listed_json = ram_requests.ls(type, length)
+    for item in listed_json:
         table.append(format_json_item(item, rules))
     print_table(table, rules)
 
