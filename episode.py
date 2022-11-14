@@ -9,12 +9,12 @@ RULES = ["episode", "id", "name", "air_date"]
 
 
 @app.command()
-def ls(episode: bool = typer.Option(True, "--episode", "-e"),
-       id: bool = typer.Option(False, "--id", "-i"),
-       name: bool = typer.Option(False, "--name", "-n"),
-       air_date: bool = typer.Option(False, "--air_date", "-ad"),
-       characters: bool = typer.Option(False, "--characters", "-c"),
-       length: int = typer.Option(1, "--length", "-l")):
+def show(episode: bool = typer.Option(True, "--episode", "-e"),
+         id: bool = typer.Option(False, "--id", "-i"),
+         name: bool = typer.Option(False, "--name", "-n"),
+         air_date: bool = typer.Option(False, "--air_date", "-ad"),
+         characters: bool = typer.Option(False, "--characters", "-c"),
+         length: int = typer.Option(1, "--length", "-l")):
     """
     this function will list all episodes with the flags that are specified default is episode code
     :param episode: the episode code (S01E02)
@@ -25,9 +25,7 @@ def ls(episode: bool = typer.Option(True, "--episode", "-e"),
     :return: void (it prints it)
     """
     vars_dict = locals()
-    vars_dict.pop("length")
-    rules = list(filter(lambda rule: vars_dict[rule], vars_dict.keys()))
-    ram_analyzer.ls_analyzer(rules, TYPE, length);
+    ram_analyzer.show_analyzer(TYPE, vars_dict);
 
 
 @app.command()
@@ -40,10 +38,7 @@ def count(name: bool = typer.Option(True, "--name", "-n"),
     :return:
     """
     vars_dict = locals()
-    vars_dict.pop("top")
-    rules = list(filter(lambda rule: vars_dict[rule], vars_dict.keys()))
-    rules.append("count")
-    ram_analyzer.ls_with_count_property_analyzer(rules, TYPE, top)
+    ram_analyzer.show_with_count_property_analyzer(TYPE, vars_dict)
 
 
 SEGNIFICATE_FLAGS_FETCH = ["id", "episode"]

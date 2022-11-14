@@ -1,3 +1,4 @@
+from calendar import calendar
 from datetime import datetime
 import pandas as pd
 import ram_requests
@@ -14,9 +15,6 @@ ram_json = ram_urls.json()
 
 PROPERTY_TO_COUNT = {"characters": "episode", "locations": "residents", "episodes": "characters"}
 
-MONTH_DICT = {"January": "01", "February": "02", "March": "03", "April": "04", "May": "05", "June": "06", "July": "07",
-              "August": "08", "September": "09", "October": "10", "November": "11", "December": "12"}
-
 
 def format_date(date):
     """
@@ -25,7 +23,11 @@ def format_date(date):
     :return: formated date (12/12/2012)
     """
     str_date = date.split()
-    return "{:02d}".format(str_date[1][0]) + "/" + MONTH_DICT[str_date[0]] + "/" + str_date[2]
+    formated_month = list(calendar.month_name).index(str_date[0])
+    formated_day = "{:02d}".format(str_date[1][:-1])
+    formated_year = str_date[2]
+
+    return f"{formated_day}/{formated_month}/{formated_year}"
 
 
 def filter_date(json_list, date, befor):
@@ -36,15 +38,15 @@ def filter_date(json_list, date, befor):
     :param befor: the flag that will return if befor a date and after
     :return: returns a lists of objects befor or after the date
     """
-    final_list = []
+    final_entities = []
     for episode in json_list:
         formated_date = datetime.strptime(format_date(episode["air_date"]), "%d/%m/%Y")
-        current = datetime.strptime(date, "%d/%m/%Y")
-        if formated_date > current:
-            final_list.append(episode)
+        current_date = datetime.strptime(date, "%d/%m/%Y")
+        if formated_date > current_date:
+            final_entities.append(episode)
     if befor == True:
-        final_list = list(set(json_list) - set(final_list))
-    return final_list
+        final_entities = list(set(json_list) - set(final_entities))
+    return final_entities
 
 
 def analyze_date(befor, type, date, rules):
@@ -57,11 +59,11 @@ def analyze_date(befor, type, date, rules):
     :param rules: the columns specified
     :return: prints a table
     """
-    listed_jsons = ram_requests.ls(type, -1)
+    json_entities = ram_requests.show(type, -1)
     table = []
-    filter_ls = filter_date(listed_jsons, date, befor)
-    for item in filter_ls:
-        table.append(format_json_item(item, rules))
+    filter_entities = filter_date(json_entities, date, befor)
+    for entity in filter_entities:
+        table.append(format_json_item(entity, rules))
     print_table(table, rules)
 
 
@@ -72,13 +74,15 @@ def count_item_properties(json_list: list, type) -> List[int]:
     :param type: the type
     :return: a list of count
     """
-    count_list = []
+    count_entities = []
     for item in json_list:
-        count_list.append(len(item[PROPERTY_TO_COUNT[type]]))
-    return count_list
+        property_to_count = PROPERTY_TO_COUNT[type]
+        count_property = len(item[property_to_count])
+        count_entities.append(count_property)
+    return count_entities
 
 
-def ls_with_count_property_analyzer(rules, type, top):
+def show_with_count_property_analyzer(type, flags):
     """
     this function lists a type with a count property
     :param rules: the coulmns
@@ -86,10 +90,15 @@ def ls_with_count_property_analyzer(rules, type, top):
     :param length: length wanted
     :return: print table
     """
+    top = flags["top"]
+    flags.pop("top")
+    rules = list(filter(lambda rule: flags[rule], flags.keys()))
+    rules.append("count")
+
     table = []
-    listed_json = ram_requests.ls(type, -1)
-    count_list = count_item_properties(listed_json, type)
-    for count_item, json_item in zip(count_list, listed_json):
+    json_entities = ram_requests.show(type, -1)
+    count_for_entity = count_item_properties(json_entities, type)
+    for count_item, json_item in zip(count_for_entity, json_entities):
         json_item["count"] = count_item
         row = format_json_item(json_item, rules)
         table.append(row)
@@ -122,16 +131,20 @@ def print_table(table, rules):
     print(df)
 
 
-def ls_analyzer(rules, type, length):
+def show_analyzer(type, flags):
     """
     this function gets the rules (a list of the working flags) and returns the formated output
     :param rules: list of the working flags
     :param length: the length of the ls
     :return:
     """
+    length = flags["length"]
+    flags.pop("length")
+    rules = list(filter(lambda rule: flags[rule], flags.keys()))
+
     table = []
-    listed_json = ram_requests.ls(type, length)
-    for item in listed_json:
+    json_entities = ram_requests.show(type, length)
+    for item in json_entities:
         table.append(format_json_item(item, rules))
     print_table(table, rules)
 
@@ -142,7 +155,7 @@ def get_image(json_results):
     img.show()
 
 
-def fetch_analyzer(args, type, rules):
+def fetch_analyzer(type, flags):
     """
     the fetch_analyzer will get arguments, type, and rules and will fetch all the the matching objects.
     if the id option is selected it will use the filter_by_id to fetch the matching id, it will format the result and print
@@ -151,16 +164,21 @@ def fetch_analyzer(args, type, rules):
     :param rules: the cloumns that are selected
     :return: prints the table
     """
+    rules = list(flags.keys())
+    args_keys = list(filter(lambda rule: flags[rule], flags.keys()))
+    args = {key: flags[key] for key in args_keys}
+
     url = ram_json[type]
     if "id" in args:
-        filtered_list = ram_requests.filter_by_id(url, args["id"])
+        filtered_entities = ram_requests.filter_by_id(url, args["id"])
     else:
-        filtered_list = ram_requests.filter_by_args(url, args)
+        filtered_entities = ram_requests.filter_by_args(url, args)
+
     table = []
-    for item in filtered_list:
+    for item in filtered_entities:
         table.append(format_json_item(item, rules))
 
-    if len(filtered_list) == 1 and type == "characters":
-        get_image(filtered_list)
+    if len(filtered_entities) == 1 and type == "characters":
+        get_image(filtered_entities)
 
     print_table(table=table, rules=rules)

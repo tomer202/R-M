@@ -7,20 +7,18 @@ TYPE = "locations"
 
 
 @app.command()
-def ls(name: bool = typer.Option(True, "--name", "-n"),
-       id: bool = typer.Option(False, "--id", "-i"),
-       type: bool = typer.Option(False, "--type", "-t"),
-       dimension: bool = typer.Option(False, "--dimension", "-d"),
-       residents: bool = typer.Option(False, "--residents", "-r"),
-       length: int = typer.Option(1, "--length", "-l")):
+def show(name: bool = typer.Option(True, "--name", "-n"),
+         id: bool = typer.Option(False, "--id", "-i"),
+         type: bool = typer.Option(False, "--type", "-t"),
+         dimension: bool = typer.Option(False, "--dimension", "-d"),
+         residents: bool = typer.Option(False, "--residents", "-r"),
+         length: int = typer.Option(1, "--length", "-l")):
     """
     this function will list all location with the flags that are specified default is name
     :return: void (it prints it)
     """
     vars_dict = locals()
-    vars_dict.pop("length")
-    rules = list(filter(lambda rule: vars_dict[rule], vars_dict.keys()))
-    ram_analyzer.ls_analyzer(rules, TYPE, length)
+    ram_analyzer.show_analyzer(TYPE, vars_dict)
 
 
 SEGNIFICATE_FLAGS_FETCH = ["id"]
@@ -36,10 +34,7 @@ def count(name: bool = typer.Option(True, "--name", "-n"),
     :return:
     """
     vars_dict = locals()
-    vars_dict.pop("top")
-    rules = list(filter(lambda rule: vars_dict[rule], vars_dict.keys()))
-    rules.append("count")
-    ram_analyzer.ls_with_count_property_analyzer(rules, TYPE, top)
+    ram_analyzer.show_with_count_property_analyzer(TYPE, vars_dict)
 
 def break_the_rules_fetch(flags):
     """
@@ -72,7 +67,4 @@ def fetch(name: str = typer.Option(None, "--name", "-n"),
     if break_the_rules_fetch(vars_dict):
         print("CANT USE THOSE FLAGS TOGETHER")
     else:
-        rules = list(vars_dict.keys())
-        args_keys = list(filter(lambda rule: vars_dict[rule], vars_dict.keys()))
-        args = {key: vars_dict[key] for key in args_keys}
-        ram_analyzer.fetch_analyzer(args, TYPE, rules)
+        ram_analyzer.fetch_analyzer(TYPE, vars_dict)

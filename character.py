@@ -7,25 +7,23 @@ TYPE = "characters"
 
 
 @app.command()
-def ls(name: bool = typer.Option(True, "--name", "-n"),
-       id: bool = typer.Option(False, "--id", "-i"),
-       status: bool = typer.Option(False, "--status", "-st"),
-       species: bool = typer.Option(False, "--species", "-s"),
-       gender: bool = typer.Option(False, "--gender", "-g"),
-       type: bool = typer.Option(False, "--type", "-t"),
-       origin: bool = typer.Option(False, "--origin", "-o"),
-       location: bool = typer.Option(False, "--location", "-l"),
-       image: bool = typer.Option(False, "--image", "-i"),
-       episode: bool = typer.Option(False, "--episode", "-e"),
-       length: int = typer.Option(1, "--length", "-l")):
+def show(name: bool = typer.Option(True, "--name", "-n"),
+         id: bool = typer.Option(False, "--id", "-i"),
+         status: bool = typer.Option(False, "--status", "-st"),
+         species: bool = typer.Option(False, "--species", "-s"),
+         gender: bool = typer.Option(False, "--gender", "-g"),
+         type: bool = typer.Option(False, "--type", "-t"),
+         origin: bool = typer.Option(False, "--origin", "-o"),
+         location: bool = typer.Option(False, "--location", "-l"),
+         image: bool = typer.Option(False, "--image", "-i"),
+         episode: bool = typer.Option(False, "--episode", "-e"),
+         length: int = typer.Option(1, "--length", "-l")):
     """
     this function will list all characters with the flags that are specified default is name
     :return: void (it prints it)
     """
     vars_dict = locals()
-    vars_dict.pop("length")
-    rules = list(filter(lambda rule: vars_dict[rule], vars_dict.keys()))
-    ram_analyzer.ls_analyzer(rules, TYPE, length)
+    ram_analyzer.show_analyzer(TYPE, vars_dict)
 
 
 @app.command()
@@ -38,10 +36,7 @@ def count(name: bool = typer.Option(True, "--name", "-n"),
     :return:
     """
     vars_dict = locals()
-    vars_dict.pop("top")
-    rules = list(filter(lambda rule: vars_dict[rule], vars_dict.keys()))
-    rules.append("count")
-    ram_analyzer.ls_with_count_property_analyzer(rules, TYPE, top)
+    ram_analyzer.show_with_count_property_analyzer(TYPE, vars_dict)
 
 SEGNIFICATE_FLAGS_FETCH = ["id"]
 
