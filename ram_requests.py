@@ -44,7 +44,6 @@ def get_all_pages_info(page_json, length):
         the_list = the_list + multiple_results(page_json)
         page_json = json.loads(requests.get(page_json["info"]["next"]).text)
         length = length - 1
-
     return the_list
 
 
@@ -54,7 +53,8 @@ def ls(type, length):
     :param type: the type to list (character, location, episode)
     :return: returns a list of JSONs
     """
-    json_page = json.loads(requests.get(ram_json[type]).text)
+    api_request = requests.get(ram_json[type]).text
+    json_page = json.loads(api_request)
     return get_all_pages_info(json_page, length)
 
 
@@ -64,8 +64,11 @@ def filter_by_id(url, ids):
     :param ids:
     :return:
     """
-    formated_id = ((','.join(map(str, ids))) if isinstance(ids, list) else str(ids))
-    page_json = json.loads(requests.get(url + f"/{formated_id}").text)
+    formated_id = str(ids)
+    if isinstance(ids, list):
+        formated_id = ','.join(map(str, ids))
+    api_request = requests.get(f"{url}/{formated_id}").text
+    page_json = json.loads(api_request)
     the_list = []
     if not isinstance(ids, list):
         the_list.append(page_json)
@@ -95,5 +98,6 @@ def filter_by_args(url, args):
     :return: return all pages....
     """
     format_args = map_key_for_value(args)
-    page_json = json.loads(requests.get(url + f"/?{format_args}").text)
+    api_request = requests.get(f"{url}/?{format_args}").text
+    page_json = json.loads(api_request)
     return get_all_pages_info(page_json, -1)
